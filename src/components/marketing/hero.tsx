@@ -35,7 +35,6 @@ const Hero = () => {
 
     // Calculator state
     const [selectedGoldType, setSelectedGoldType] = useState<string>("96.5");
-    const [goldPurity, setGoldPurity] = useState<string>("100");
     const [goldWeight, setGoldWeight] = useState<string>("1");
     const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null);
 
@@ -69,15 +68,21 @@ const Hero = () => {
         
         if (currentGoldPrice?.ask) {
             const weight = parseFloat(goldWeight) || 0;
-            const purity = parseFloat(goldPurity) || 0;
-            const basePrice = currentGoldPrice.ask;
             
-            // Convert weight from grams to baht (1 baht = 15.244 grams)
-            const weightInBaht = weight / 15.244;
-            const calculatedPrice = (basePrice * weightInBaht * (purity / 100));
+            let calculatedPrice;
+            if (selectedGoldType === "96.5" && currentGoldPrice.bid !== null) {
+                // Formula for 96.5% gold: (ราคารับซื้อ/15.2) * น้ำหนักทอง (กรัม)
+                calculatedPrice = (currentGoldPrice.bid / 15.2) * weight;
+            } else {
+                // Formula for 99.99% gold: ราคาขาย +3.5% x 0.0656 x น้ำหนักทอง
+                const sellPrice = currentGoldPrice.ask;
+                const priceWithMarkup = sellPrice * 1.035; // Add 3.5%
+                calculatedPrice = priceWithMarkup * 0.0656 * weight;
+            }
+            
             setEstimatedPrice(calculatedPrice);
         }
-    }, [goldPrices, goldWeight, goldPurity, selectedGoldType]);
+    }, [goldPrices, goldWeight, selectedGoldType]);
 
     const formatPrice = (price: number | null) => {
         if (price === null) return "ไม่พบข้อมูล";
@@ -191,17 +196,6 @@ const Hero = () => {
                                         ))}
                                     </SelectContent>
                                 </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm text-muted-foreground">เปอร์เซ็นต์ของทอง</label>
-                                <Input
-                                    type="number"
-                                    value={goldPurity}
-                                    onChange={(e) => setGoldPurity(e.target.value)}
-                                    min="0"
-                                    max="100"
-                                    placeholder="เปอร์เซ็นต์ของทอง"
-                                />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm text-muted-foreground">น้ำหนักทอง (กรัม)</label>
