@@ -20,7 +20,7 @@ const Navbar = () => {
                                 className="w-[43px] h-[43px]"
                             />
                             <span className="text-l font-semibold hidden lg:block">
-                                Aurienn
+                                จ่าคิง ปากพนัง
                             </span>
                         </Link>
                     </div>
