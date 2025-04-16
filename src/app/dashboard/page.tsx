@@ -8,7 +8,7 @@ import { getBlogPosts } from "@/lib/blog";
 
 export default async function DashboardPage() {
     const cookieStore = cookies();
-    const auth = cookieStore.get("auth");
+    const auth = (await cookieStore).get("auth");
 
     if (!auth || auth.value !== "true") {
         redirect("/login");

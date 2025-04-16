@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 export async function POST(request: Request) {
     // Verify authentication
     const cookieStore = cookies();
-    const auth = cookieStore.get("auth");
+    const auth = (await cookieStore).get("auth");
     
     if (!auth || auth.value !== "true") {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
