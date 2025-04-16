@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { deleteBlogPost } from "@/lib/db";
 import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
 export async function DELETE(request: Request) {
     // Verify authentication
@@ -23,27 +22,7 @@ export async function DELETE(request: Request) {
             );
         }
 
-        // Instead of deleting the file, we'll return success in production
-        // This is because serverless environments are read-only
-        if (process.env.NODE_ENV === "production") {
-            return NextResponse.json({ 
-                success: true,
-                message: "Blog post marked for deletion"
-            });
-        }
-
-        const filePath = path.join(process.cwd(), "content/blog", `${slug}.md`);
-
-        // Check if file exists
-        if (!fs.existsSync(filePath)) {
-            return NextResponse.json(
-                { error: "Blog post not found" },
-                { status: 404 }
-            );
-        }
-
-        // Delete the file (only in development)
-        fs.unlinkSync(filePath);
+        await deleteBlogPost(slug);
 
         return NextResponse.json({ 
             success: true,

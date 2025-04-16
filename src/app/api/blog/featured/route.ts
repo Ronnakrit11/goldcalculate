@@ -1,4 +1,4 @@
-import { getBlogPosts } from "@/lib/blog";
+import { getBlogPosts } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 
@@ -23,6 +23,10 @@ export async function GET() {
         });
     } catch (error) {
         console.error('Error fetching blog posts:', error);
-        return NextResponse.json({ error: 'Failed to fetch blog posts' }, { status: 500 });
+        return NextResponse.json({ 
+            error: 'Failed to fetch blog posts' 
+        }, { 
+            status: 500 
+        });
     }
 }

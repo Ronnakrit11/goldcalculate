@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { createBlogPost } from "@/lib/db";
 import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
     // Verify authentication
@@ -31,18 +32,18 @@ export async function POST(request: Request) {
             .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
             .trim(); // Trim hyphens from start and end
 
-        // In serverless environments, we'll simulate success
-        // since we can't write to the filesystem
+        const post = await createBlogPost({
+            title,
+            content,
+            slug,
+            author: "Aurienn Team", // Set default author
+            ...metadata
+        });
+
         return NextResponse.json({ 
             success: true,
-            slug,
             message: "Blog post created successfully",
-            data: {
-                title,
-                content,
-                slug,
-                ...metadata
-            }
+            data: post
         });
     } catch (error) {
         console.error("Error creating blog post:", error);
