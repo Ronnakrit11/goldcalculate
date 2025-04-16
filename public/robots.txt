@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/*
+Disallow: /admin/*
+
+Sitemap: https://www.aurienn.com/sitemap.xml
+Host: https://www.aurienn.com
