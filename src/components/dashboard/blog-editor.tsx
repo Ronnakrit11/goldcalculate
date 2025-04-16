@@ -35,11 +35,15 @@ export default function BlogEditor() {
                 }),
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error("Failed to create blog post");
+                throw new Error(data.error || "Failed to create blog post");
             }
 
             toast.success("Blog post created successfully!");
+            
+            // Reset form
             setFormData({
                 title: "",
                 description: "",
@@ -49,8 +53,15 @@ export default function BlogEditor() {
                 keywords: "",
                 image: "/images/feature-one.svg"
             });
+
+            // Reload the page after successful creation
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+
         } catch (error) {
-            toast.error("Failed to create blog post");
+            console.error("Error:", error);
+            toast.error(error instanceof Error ? error.message : "Failed to create blog post");
         } finally {
             setLoading(false);
         }
