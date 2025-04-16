@@ -35,13 +35,18 @@ export default function BlogEditor() {
                 }),
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                throw new Error(data.error || "Failed to create blog post");
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            toast.success(data.message || "Blog post created successfully!");
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new TypeError("Response was not JSON");
+            }
+
+            const data = await response.json();
+            
+            toast.success("Blog post created successfully!");
             
             // Reset form
             setFormData({
@@ -55,13 +60,11 @@ export default function BlogEditor() {
             });
 
             // Reload the page after successful creation
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
+            window.location.reload();
 
         } catch (error) {
             console.error("Error:", error);
-            toast.error(error instanceof Error ? error.message : "Failed to create blog post");
+            toast.error("Failed to create blog post. Please try again.");
         } finally {
             setLoading(false);
         }

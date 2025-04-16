@@ -1,7 +1,7 @@
 "use client";
 
-import { BlogPost } from "@/lib/blog";
-import { format } from "date-fns";
+import { BlogPost } from "@/lib/db";
+import { format, parseISO } from "date-fns";
 import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -21,21 +21,32 @@ export default function BlogList({ posts }: BlogListProps) {
                 method: "DELETE",
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                throw new Error(data.error || "Failed to delete post");
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            toast.success(data.message || "Post deleted successfully");
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new TypeError("Response was not JSON");
+            }
 
-            // Reload the page after a short delay
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
+            const data = await response.json();
+            toast.success("Post deleted successfully");
+
+            // Reload the page after successful deletion
+            window.location.reload();
         } catch (error) {
             console.error("Error:", error);
-            toast.error(error instanceof Error ? error.message : "Failed to delete post");
+            toast.error("Failed to delete post. Please try again.");
+        }
+    };
+
+    const formatDate = (dateString: string) => {
+        try {
+            return format(parseISO(dateString), "MMM dd, yyyy");
+        } catch (error) {
+            console.error("Date formatting error:", error);
+            return dateString;
         }
     };
 
@@ -57,7 +68,7 @@ export default function BlogList({ posts }: BlogListProps) {
                                 <td className="px-4 py-2">{post.title}</td>
                                 <td className="px-4 py-2">{post.category}</td>
                                 <td className="px-4 py-2">
-                                    {format(new Date(post.date), "MMM dd, yyyy")}
+                                    {formatDate(post.created_at)}
                                 </td>
                                 <td className="px-4 py-2">
                                     <div className="flex items-center gap-2">

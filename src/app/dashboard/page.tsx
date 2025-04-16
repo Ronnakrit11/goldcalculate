@@ -4,7 +4,7 @@ import Container from "@/components/global/container";
 import BlogEditor from "@/components/dashboard/blog-editor";
 import BlogList from "@/components/dashboard/blog-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getBlogPosts } from "@/lib/blog";
+import { getBlogPosts } from "@/lib/db";
 
 export default async function DashboardPage() {
     const cookieStore = cookies();

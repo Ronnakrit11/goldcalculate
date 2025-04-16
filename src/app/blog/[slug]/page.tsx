@@ -1,5 +1,5 @@
-import { getBlogPost } from "@/lib/blog";
-import { format } from "date-fns";
+import { getBlogPost } from "@/lib/db";
+import { format, parseISO } from "date-fns";
 import Markdown from "markdown-to-jsx";
 import { notFound } from "next/navigation";
 import Container from "@/components/global/container";
@@ -14,13 +14,12 @@ type PageProps = {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-// Force dynamic rendering for blog postss
+// Force dynamic rendering for blog posts
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
     const resolvedParams = await params;
-    const resolvedSearchParams = await searchParams;
     const post = await getBlogPost(decodeURIComponent(resolvedParams.slug));
 
     if (!post) {
@@ -39,7 +38,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
             title: post.title,
             description: post.description,
             type: "article",
-            publishedTime: post.date,
+            publishedTime: post.created_at,
             authors: [post.author],
             images: [post.image],
         },
@@ -51,14 +50,49 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
         },
     };
 }
+
 export default async function BlogPostPage({ params, searchParams }: PageProps) {
     const resolvedParams = await params;
-    const resolvedSearchParams = await searchParams;
     const post = await getBlogPost(decodeURIComponent(resolvedParams.slug));
 
     if (!post) {
         notFound();
     }
+
+    const formatDate = (dateValue: string | Date | any) => {
+        try {
+            // Handle different date formats
+            if (!dateValue) return '';
+            
+            // If it's already a Date object
+            if (dateValue instanceof Date) {
+                return format(dateValue, "MMMM dd, yyyy");
+            }
+            
+            // If it's a string
+            if (typeof dateValue === 'string') {
+                return format(parseISO(dateValue), "MMMM dd, yyyy");
+            }
+            
+            // If it's a number (timestamp)
+            if (typeof dateValue === 'number') {
+                return format(new Date(dateValue), "MMMM dd, yyyy");
+            }
+            
+            // If it's an object with toISOString method
+            if (dateValue && typeof dateValue.toISOString === 'function') {
+                return format(parseISO(dateValue.toISOString()), "MMMM dd, yyyy");
+            }
+            
+            // Fallback
+            console.log("Unknown date format:", dateValue);
+            return String(dateValue);
+        } catch (error) {
+            console.error("Date formatting error:", error);
+            return String(dateValue);
+        }
+    };
+
     return (
         <Wrapper>
             <Container className="py-20">
@@ -77,11 +111,11 @@ export default async function BlogPostPage({ params, searchParams }: PageProps) 
                         <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
                             <span>{post.author}</span>
                             <span>•</span>
-                            <time dateTime={post.date}>
-                                {format(new Date(post.date), "MMMM dd, yyyy")}
+                            <time dateTime={post.created_at}>
+                                {formatDate(post.created_at)}
                             </time>
                             <span>•</span>
-                            <span>{post.readingTime} min read</span>
+                            <span>{post.readingTime || '5'} min read</span>
                             <span>•</span>
                             <span className="capitalize">{post.category}</span>
                         </div>

@@ -7,8 +7,8 @@ import Container from "../global/container";
 import { Button } from "../ui/button";
 import { MagicCard } from "../ui/magic-card";
 import { useEffect, useState } from "react";
-import { BlogPost } from "@/lib/blog";
-import { format } from "date-fns";
+import { BlogPost } from "@/lib/db";
+import { format, parseISO } from "date-fns";
 
 const Blog = () => {
     const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -30,6 +30,12 @@ const Blog = () => {
             });
             
             if (!response.ok) throw new Error('Failed to fetch posts');
+            
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new TypeError("Response was not JSON");
+            }
+            
             const data = await response.json();
             setPosts(data.posts);
         } catch (error) {
@@ -70,11 +76,37 @@ const Blog = () => {
         router.push(`/blog/${encodeURIComponent(slug)}`);
     };
 
-    const formatDate = (dateString: string) => {
+    const formatDate = (dateValue: string | Date | any) => {
         try {
-            return format(new Date(dateString), "MMMM dd, yyyy");
+            // Handle different date formats
+            if (!dateValue) return '';
+            
+            // If it's already a Date object
+            if (dateValue instanceof Date) {
+                return format(dateValue, "MMMM dd, yyyy");
+            }
+            
+            // If it's a string
+            if (typeof dateValue === 'string') {
+                return format(parseISO(dateValue), "MMMM dd, yyyy");
+            }
+            
+            // If it's a number (timestamp)
+            if (typeof dateValue === 'number') {
+                return format(new Date(dateValue), "MMMM dd, yyyy");
+            }
+            
+            // If it's an object with toISOString method
+            if (dateValue && typeof dateValue.toISOString === 'function') {
+                return format(parseISO(dateValue.toISOString()), "MMMM dd, yyyy");
+            }
+            
+            // Fallback
+            console.log("Unknown date format:", dateValue);
+            return String(dateValue);
         } catch (error) {
-            return "Invalid date";
+            console.error("Date formatting error:", error);
+            return String(dateValue);
         }
     };
 
@@ -126,9 +158,9 @@ const Blog = () => {
                                         />
                                     </div>
                                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                                        <span>{formatDate(post.date)}</span>
+                                        <span>{formatDate(post.created_at)}</span>
                                         <span>•</span>
-                                        <span>{post.readingTime} min read</span>
+                                        <span>{post.readingTime || '5'} min read</span>
                                     </div>
                                     <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-500 mb-3">
                                         {post.category}
