@@ -225,7 +225,7 @@ const Hero = () => {
 
                     <Container delay={0.25} className="z-20">
                         <div className="flex items-center justify-center mt-6 gap-x-4">
-                            <Link href="https://lin.ee/EO0xuyG" className="flex items-center gap-2 group text-black">
+                            <Link href="https://web.facebook.com/profile.php?id=61570053279894" className="flex items-center gap-2 group text-black">
                                 <Button size="lg">
                                     ติดต่อเเอดมิน
                                     <ArrowRightIcon className="size-4 group-hover:translate-x-1 transition-all duration-300" />
