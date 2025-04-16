@@ -21,10 +21,14 @@ const Blog = () => {
             const response = await fetch('/api/blog/featured', {
                 method: 'GET',
                 headers: {
-                    'Cache-Control': 'no-cache',
+                    'Cache-Control': 'no-store',
                     'Pragma': 'no-cache'
+                },
+                next: {
+                    revalidate: 0
                 }
             });
+            
             if (!response.ok) throw new Error('Failed to fetch posts');
             const data = await response.json();
             setPosts(data.posts);
@@ -38,11 +42,28 @@ const Blog = () => {
     useEffect(() => {
         fetchPosts();
 
-        // Set up an interval to refresh the posts every 10 seconds
-        const interval = setInterval(fetchPosts, 10000);
+        // Set up polling interval
+        const interval = setInterval(() => {
+            fetchPosts();
+        }, 5000); // Poll every 5 seconds
 
-        // Cleanup interval on component unmount
+        // Cleanup on unmount
         return () => clearInterval(interval);
+    }, []);
+
+    // Add focus/blur event listeners to pause/resume polling when tab is inactive
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                fetchPosts(); // Fetch immediately when tab becomes visible
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, []);
 
     const handlePostClick = (slug: string) => {
