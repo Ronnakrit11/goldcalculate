@@ -8,7 +8,15 @@ export async function POST(request: Request) {
     const auth = (await cookieStore).get("auth");
     
     if (!auth || auth.value !== "true") {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        return NextResponse.json(
+            { error: "Unauthorized" }, 
+            { 
+                status: 401,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
     }
 
     try {
@@ -18,7 +26,12 @@ export async function POST(request: Request) {
         if (!title || !content) {
             return NextResponse.json(
                 { error: "Title and content are required" },
-                { status: 400 }
+                { 
+                    status: 400,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
             );
         }
 
@@ -36,7 +49,7 @@ export async function POST(request: Request) {
             title,
             content,
             slug,
-            author: "Aurienn Team", // Set default author
+            author: "Aurienn Team",
             ...metadata
         });
 
@@ -44,6 +57,10 @@ export async function POST(request: Request) {
             success: true,
             message: "Blog post created successfully",
             data: post
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
     } catch (error) {
         console.error("Error creating blog post:", error);
@@ -52,7 +69,12 @@ export async function POST(request: Request) {
                 error: "Failed to create blog post",
                 details: error instanceof Error ? error.message : "Unknown error"
             },
-            { status: 500 }
+            { 
+                status: 500,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
         );
     }
 }

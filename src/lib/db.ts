@@ -12,7 +12,7 @@ export async function getBlogPosts() {
             SELECT * FROM blog_posts 
             ORDER BY created_at DESC
         `;
-        return posts;
+        return posts || [];
     } catch (error) {
         console.error('Error fetching blog posts:', error);
         return [];

@@ -8,7 +8,15 @@ export async function DELETE(request: Request) {
     const auth = (await cookieStore).get("auth");
     
     if (!auth || auth.value !== "true") {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        return NextResponse.json(
+            { error: "Unauthorized" }, 
+            { 
+                status: 401,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
     }
 
     try {
@@ -18,7 +26,12 @@ export async function DELETE(request: Request) {
         if (!slug) {
             return NextResponse.json(
                 { error: "Slug is required" },
-                { status: 400 }
+                { 
+                    status: 400,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
             );
         }
 
@@ -27,6 +40,10 @@ export async function DELETE(request: Request) {
         return NextResponse.json({ 
             success: true,
             message: "Blog post deleted successfully"
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
     } catch (error) {
         console.error("Error deleting blog post:", error);
@@ -35,7 +52,12 @@ export async function DELETE(request: Request) {
                 error: "Failed to delete blog post",
                 details: error instanceof Error ? error.message : "Unknown error"
             },
-            { status: 500 }
+            { 
+                status: 500,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
         );
     }
 }
