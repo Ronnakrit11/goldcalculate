@@ -15,31 +15,38 @@ const Blog = () => {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
-    useEffect(() => {
-        async function fetchPosts() {
-            try {
-                setIsLoading(true);
-                const response = await fetch('/api/blog/featured', {
-                    method: 'GET',
-                    headers: {
-                        'Cache-Control': 'no-cache'
-                    }
-                });
-                if (!response.ok) throw new Error('Failed to fetch posts');
-                const data = await response.json();
-                setPosts(data.posts);
-            } catch (error) {
-                console.error('Error fetching blog posts:', error);
-            } finally {
-                setIsLoading(false);
-            }
+    const fetchPosts = async () => {
+        try {
+            setIsLoading(true);
+            const response = await fetch('/api/blog/featured', {
+                method: 'GET',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            });
+            if (!response.ok) throw new Error('Failed to fetch posts');
+            const data = await response.json();
+            setPosts(data.posts);
+        } catch (error) {
+            console.error('Error fetching blog posts:', error);
+        } finally {
+            setIsLoading(false);
         }
+    };
 
+    useEffect(() => {
         fetchPosts();
+
+        // Set up an interval to refresh the posts every 10 seconds
+        const interval = setInterval(fetchPosts, 10000);
+
+        // Cleanup interval on component unmount
+        return () => clearInterval(interval);
     }, []);
 
     const handlePostClick = (slug: string) => {
-        router.replace(`/blog/${encodeURIComponent(slug)}`);
+        router.push(`/blog/${encodeURIComponent(slug)}`);
     };
 
     const formatDate = (dateString: string) => {
