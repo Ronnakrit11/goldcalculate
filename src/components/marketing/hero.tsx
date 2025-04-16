@@ -24,7 +24,7 @@ interface GoldPrices {
 }
 
 const goldTypes = [
-    { value: "96.5", label: "ทองคำ 96.5%" },
+    { value: "96.5", label: "ทองสมาคม" },
     { value: "99.99", label: "ทองคำ 99.99%" }
 ];
 
@@ -158,7 +158,7 @@ const Hero = () => {
                                 </div>
                             </div>
                             <div className="p-6 rounded-xl border border-border bg-card">
-                                <h3 className="text-lg font-semibold mb-4">ทองคำ 96.5%</h3>
+                                <h3 className="text-lg font-semibold mb-4">ทองสมาคม</h3>
                                 <div className="space-y-4">
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">ราคารับซื้อ</span>
