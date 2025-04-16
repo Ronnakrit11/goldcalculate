@@ -24,4 +24,5 @@ model BlogPost {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@map(
+  @@map("blog_posts")
+}
