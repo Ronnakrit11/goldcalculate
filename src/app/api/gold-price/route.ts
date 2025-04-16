@@ -5,26 +5,34 @@ export async function GET() {
         const response = await fetch("http://www.thaigold.info/RealTimeDataV2/gtdata_.txt");
         const text = await response.text();
         
-        // The data comes as a JSON array string, so we need to parse it
+        // Parse the JSON data
         const goldDataArray = JSON.parse(text);
         
-        // Find the 99.99% gold price data
-        const goldData = Array.isArray(goldDataArray) 
-            ? goldDataArray.find(item => item?.name === "99.99%")
-            : goldDataArray;
+        // Find the gold price data
+        const gold9999 = goldDataArray.find((item: any) => item.name === "99.99%");
+        const gold965 = goldDataArray.find((item: any) => item.name === "สมาคมฯ"); // Updated to match the correct name
 
-        if (goldData && typeof goldData.bid === 'number' && typeof goldData.ask === 'number') {
-            return NextResponse.json({
-                bid: goldData.bid,
-                ask: goldData.ask,
-                timestamp: new Date().toISOString()
-            });
+        if (!gold9999 && !gold965) {
+            return NextResponse.json(
+                { error: "Gold price data not found" },
+                { status: 404 }
+            );
         }
+
+        return NextResponse.json({
+            gold9999: {
+                bid: gold9999?.bid ? parseInt(gold9999.bid) : null,
+                ask: gold9999?.ask ? parseInt(gold9999.ask) : null,
+                diff: gold9999?.diff || null
+            },
+            gold965: {
+                bid: gold965?.bid ? parseInt(gold965.bid) : null,
+                ask: gold965?.ask ? parseInt(gold965.ask) : null,
+                diff: gold965?.diff || null
+            },
+            timestamp: new Date().toISOString()
+        });
         
-        return NextResponse.json(
-            { error: "Gold price data not found" },
-            { status: 404 }
-        );
     } catch (error) {
         console.error("Error fetching gold price:", error);
         return NextResponse.json(

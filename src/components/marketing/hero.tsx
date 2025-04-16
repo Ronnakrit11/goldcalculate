@@ -14,6 +14,12 @@ import { Input } from "../ui/input";
 interface GoldPrice {
     bid: number | null;
     ask: number | null;
+    diff: string | null;
+}
+
+interface GoldPrices {
+    gold9999: GoldPrice;
+    gold965: GoldPrice;
     timestamp: string;
 }
 
@@ -23,8 +29,7 @@ const goldTypes = [
 ];
 
 const Hero = () => {
-    const [goldPrice9999, setGoldPrice9999] = useState<GoldPrice | null>(null);
-    const [goldPrice965, setGoldPrice965] = useState<GoldPrice | null>(null);
+    const [goldPrices, setGoldPrices] = useState<GoldPrices | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -39,28 +44,10 @@ const Hero = () => {
             try {
                 setIsLoading(true);
                 setError(null);
-                const response = await fetch("http://www.thaigold.info/RealTimeDataV2/gtdata_.txt");
-                const text = await response.text();
-                const goldDataArray = JSON.parse(text);
-
-                const gold9999 = goldDataArray.find((item: any) => item.name === "99.99%");
-                const gold965 = goldDataArray.find((item: any) => item.name === "ทองคำแท่ง 96.5%");
-
-                if (gold9999) {
-                    setGoldPrice9999({
-                        bid: gold9999.bid,
-                        ask: gold9999.ask,
-                        timestamp: new Date().toISOString()
-                    });
-                }
-
-                if (gold965) {
-                    setGoldPrice965({
-                        bid: gold965.bid,
-                        ask: gold965.ask,
-                        timestamp: new Date().toISOString()
-                    });
-                }
+                const response = await fetch('/api/gold-price');
+                if (!response.ok) throw new Error('Failed to fetch gold price');
+                const data = await response.json();
+                setGoldPrices(data);
             } catch (error) {
                 console.error("Error fetching gold price:", error);
                 setError(error instanceof Error ? error.message : 'Failed to fetch gold price');
@@ -76,7 +63,9 @@ const Hero = () => {
     }, []);
 
     useEffect(() => {
-        const currentGoldPrice = selectedGoldType === "99.99" ? goldPrice9999 : goldPrice965;
+        if (!goldPrices) return;
+
+        const currentGoldPrice = selectedGoldType === "99.99" ? goldPrices.gold9999 : goldPrices.gold965;
         
         if (currentGoldPrice?.ask) {
             const weight = parseFloat(goldWeight) || 0;
@@ -86,7 +75,7 @@ const Hero = () => {
             const calculatedPrice = (basePrice * weight * (purity / 100));
             setEstimatedPrice(calculatedPrice);
         }
-    }, [goldPrice9999, goldPrice965, goldWeight, goldPurity, selectedGoldType]);
+    }, [goldPrices, goldWeight, goldPurity, selectedGoldType]);
 
     const formatPrice = (price: number | null) => {
         if (price === null) return "ไม่พบข้อมูล";
@@ -133,7 +122,7 @@ const Hero = () => {
                             </span>
                             <span className="backdrop absolute inset-[1px] rounded-full bg-background transition-colors duration-200 group-hover:bg-neutral-800" />
                             <span className="z-10 py-0.5 text-sm text-neutral-100 flex items-center">
-                                <span className="px-2 py-[0.5px] h-[18px] tracking-wide flex items-center justify-center rounded-full bg-gradient-to-r from-sky-400 to-blue-600 text-[9px] font-medium mr-2 text-white">
+                                <span className="px-2 py-[0.5px] h-[18px] tracking-wide flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-red-600 text-[9px] font-medium mr-2 text-black">
                                     LIVE
                                 </span>
                                 ราคาทองวันนี้
@@ -149,11 +138,15 @@ const Hero = () => {
                                 <div className="space-y-4">
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">ราคารับซื้อ</span>
-                                        <span className="font-medium">{isLoading ? "กำลังโหลด..." : formatPrice(goldPrice9999?.bid ?? null)}</span>
+                                        <span className="font-medium">
+                                            {isLoading ? "กำลังโหลด..." : formatPrice(goldPrices?.gold9999?.bid ?? null)}
+                                        </span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">ราคาขาย</span>
-                                        <span className="font-medium">{isLoading ? "กำลังโหลด..." : formatPrice(goldPrice9999?.ask ?? null)}</span>
+                                        <span className="font-medium">
+                                            {isLoading ? "กำลังโหลด..." : formatPrice(goldPrices?.gold9999?.ask ?? null)}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -162,11 +155,15 @@ const Hero = () => {
                                 <div className="space-y-4">
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">ราคารับซื้อ</span>
-                                        <span className="font-medium">{isLoading ? "กำลังโหลด..." : formatPrice(goldPrice965?.bid ?? null)}</span>
+                                        <span className="font-medium">
+                                            {isLoading ? "กำลังโหลด..." : formatPrice(goldPrices?.gold965?.bid ?? null)}
+                                        </span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">ราคาขาย</span>
-                                        <span className="font-medium">{isLoading ? "กำลังโหลด..." : formatPrice(goldPrice965?.ask ?? null)}</span>
+                                        <span className="font-medium">
+                                            {isLoading ? "กำลังโหลด..." : formatPrice(goldPrices?.gold965?.ask ?? null)}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -217,7 +214,7 @@ const Hero = () => {
                             </div>
                             <div className="pt-4 text-center">
                                 <div className="text-lg font-semibold">ราคาประเมิน</div>
-                                <div className="text-2xl text-blue-500 font-bold">
+                                <div className="text-2xl text-primary font-bold">
                                     {isLoading ? "กำลังคำนวณ..." : formatPrice(estimatedPrice)}
                                 </div>
                             </div>
@@ -243,10 +240,19 @@ const Hero = () => {
 
                     <Container delay={0.3} className="relative">
                         <div className="relative rounded-xl lg:rounded-[32px] border border-border p-2 backdrop-blur-lg mt-10 max-w-6xl mx-auto">
-                            <div className="absolute top-1/8 left-1/2 -z-10 bg-gradient-to-r from-sky-500 to-blue-600 w-1/2 lg:w-3/4 -translate-x-1/2 h-1/4 -translate-y-1/2 inset-0 blur-[4rem] lg:blur-[10rem] animate-image-glow"></div>
-                            <div className="hidden lg:block absolute -top-1/8 left-1/2 -z-20 bg-blue-600 w-1/4 -translate-x-1/2 h-1/4 -translate-y-1/2 inset-0 blur-[10rem] animate-image-glow"></div>
+                            <div className="absolute top-1/8 left-1/2 -z-10 bg-gradient-to-r from-primary to-red-600 w-1/2 lg:w-3/4 -translate-x-1/2 h-1/4 -translate-y-1/2 inset-0 blur-[4rem] lg:blur-[10rem] animate-image-glow"></div>
+                            <div className="hidden lg:block absolute -top-1/8 left-1/2 -z-20 bg-primary w-1/4 -translate-x-1/2 h-1/4 -translate-y-1/2 inset-0 blur-[10rem] animate-image-glow"></div>
 
-                        
+                            <div className="rounded-lg lg:rounded-[22px] border border-border bg-background">
+                                <Image
+                                    src="/images/dashboard_Aurienn.png"
+                                    alt="ระบบออมทองออนไลน์ - หน้าแดชบอร์ด"
+                                    width={1920}
+                                    height={1080}
+                                    className="rounded-lg lg:rounded-[20px]"
+                                    priority
+                                />
+                            </div>
                         </div>
                         <div className="bg-gradient-to-t from-background to-transparent absolute bottom-0 inset-x-0 w-full h-1/2"></div>
                     </Container>
