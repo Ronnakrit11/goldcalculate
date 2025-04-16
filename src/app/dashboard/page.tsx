@@ -2,14 +2,19 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Container from "@/components/global/container";
 import BlogEditor from "@/components/dashboard/blog-editor";
+import BlogList from "@/components/dashboard/blog-list";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getBlogPosts } from "@/lib/blog";
 
 export default async function DashboardPage() {
     const cookieStore = cookies();
-    const auth = (await cookieStore).get("auth");
+    const auth = cookieStore.get("auth");
 
     if (!auth || auth.value !== "true") {
         redirect("/login");
     }
+
+    const posts = await getBlogPosts();
 
     return (
         <main className="min-h-screen bg-background">
@@ -26,7 +31,19 @@ export default async function DashboardPage() {
                             </button>
                         </form>
                     </div>
-                    <BlogEditor />
+
+                    <Tabs defaultValue="posts" className="w-full">
+                        <TabsList className="mb-4">
+                            <TabsTrigger value="posts">Blog Posts</TabsTrigger>
+                            <TabsTrigger value="create">Create New Post</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="posts">
+                            <BlogList posts={posts} />
+                        </TabsContent>
+                        <TabsContent value="create">
+                            <BlogEditor />
+                        </TabsContent>
+                    </Tabs>
                 </div>
             </Container>
         </main>
