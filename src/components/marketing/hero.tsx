@@ -72,7 +72,9 @@ const Hero = () => {
             const purity = parseFloat(goldPurity) || 0;
             const basePrice = currentGoldPrice.ask;
             
-            const calculatedPrice = (basePrice * weight * (purity / 100));
+            // Convert weight from grams to baht (1 baht = 15.244 grams)
+            const weightInBaht = weight / 15.244;
+            const calculatedPrice = (basePrice * weightInBaht * (purity / 100));
             setEstimatedPrice(calculatedPrice);
         }
     }, [goldPrices, goldWeight, goldPurity, selectedGoldType]);
@@ -202,7 +204,7 @@ const Hero = () => {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm text-muted-foreground">น้ำหนักทอง (บาท)</label>
+                                <label className="text-sm text-muted-foreground">น้ำหนักทอง (กรัม)</label>
                                 <Input
                                     type="number"
                                     value={goldWeight}
