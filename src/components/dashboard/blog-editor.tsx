@@ -41,7 +41,7 @@ export default function BlogEditor() {
                 throw new Error(data.error || "Failed to create blog post");
             }
 
-            toast.success("Blog post created successfully!");
+            toast.success(data.message || "Blog post created successfully!");
             
             // Reset form
             setFormData({
