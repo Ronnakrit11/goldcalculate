@@ -1,10 +1,20 @@
 import { neon } from '@neondatabase/serverless';
+import { PrismaClient } from '@prisma/client';
 
 if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL is not defined');
 }
 
 export const sql = neon(process.env.DATABASE_URL);
+
+// Initialize Prisma Client
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+export const prisma = globalForPrisma.prisma ?? new PrismaClient()
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 export interface BlogPost {
     id: string;
@@ -24,24 +34,12 @@ export interface BlogPost {
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
     try {
-        const posts = await sql`
-            SELECT 
-                id,
-                slug,
-                title,
-                description,
-                content,
-                excerpt,
-                category,
-                author,
-                image,
-                keywords,
-                created_at,
-                updated_at
-            FROM blog_posts 
-            ORDER BY created_at DESC
-        `;
-        return posts as BlogPost[] || [];
+        const posts = await prisma.blogPost.findMany({
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+        return posts as unknown as BlogPost[];
     } catch (error) {
         console.error('Error fetching blog posts:', error);
         return [];
@@ -50,25 +48,12 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
 
 export async function getBlogPost(slug: string): Promise<BlogPost | null> {
     try {
-        const posts = await sql`
-            SELECT 
-                id,
-                slug,
-                title,
-                description,
-                content,
-                excerpt,
-                category,
-                author,
-                image,
-                keywords,
-                created_at,
-                updated_at
-            FROM blog_posts 
-            WHERE slug = ${slug}
-        `;
-        const post = posts[0] as BlogPost;
-        return post || null;
+        const post = await prisma.blogPost.findUnique({
+            where: {
+                slug: slug
+            }
+        });
+        return post as unknown as BlogPost | null;
     } catch (error) {
         console.error('Error fetching blog post:', error);
         return null;
@@ -79,51 +64,21 @@ export type CreateBlogPostInput = Omit<BlogPost, 'id' | 'created_at' | 'updated_
 
 export async function createBlogPost(post: CreateBlogPostInput): Promise<BlogPost> {
     try {
-        const posts = await sql`
-            INSERT INTO blog_posts (
-                id,
-                slug,
-                title,
-                description,
-                content,
-                excerpt,
-                category,
-                author,
-                image,
-                keywords
-            ) VALUES (
-                gen_random_uuid(),
-                ${post.slug},
-                ${post.title},
-                ${post.description},
-                ${post.content},
-                ${post.excerpt},
-                ${post.category},
-                ${post.author || 'Aurienn Team'},
-                ${post.image || '/images/feature-one.svg'},
-                ${post.keywords}
-            )
-            RETURNING 
-                id,
-                slug,
-                title,
-                description,
-                content,
-                excerpt,
-                category,
-                author,
-                image,
-                keywords,
-                created_at,
-                updated_at
-        `;
+        const newPost = await prisma.blogPost.create({
+            data: {
+                slug: post.slug,
+                title: post.title,
+                description: post.description,
+                content: post.content,
+                excerpt: post.excerpt,
+                category: post.category,
+                author: post.author || 'Aurienn Team',
+                image: post.image || '/images/feature-one.svg',
+                keywords: post.keywords
+            }
+        });
 
-        const newPost = posts[0] as BlogPost;
-        if (!newPost) {
-            throw new Error('Failed to create blog post');
-        }
-
-        return newPost;
+        return newPost as unknown as BlogPost;
     } catch (error) {
         console.error('Error creating blog post:', error);
         throw error;
@@ -132,10 +87,11 @@ export async function createBlogPost(post: CreateBlogPostInput): Promise<BlogPos
 
 export async function deleteBlogPost(slug: string): Promise<void> {
     try {
-        await sql`
-            DELETE FROM blog_posts 
-            WHERE slug = ${slug}
-        `;
+        await prisma.blogPost.delete({
+            where: {
+                slug: slug
+            }
+        });
     } catch (error) {
         console.error('Error deleting blog post:', error);
         throw error;
