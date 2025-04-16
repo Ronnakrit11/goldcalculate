@@ -24,7 +24,7 @@ export interface BlogPost {
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
     try {
-        const posts = await sql<BlogPost[]>`
+        const posts = await sql`
             SELECT 
                 id,
                 slug,
@@ -41,7 +41,7 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
             FROM blog_posts 
             ORDER BY created_at DESC
         `;
-        return posts || [];
+        return posts as BlogPost[] || [];
     } catch (error) {
         console.error('Error fetching blog posts:', error);
         return [];
@@ -50,7 +50,7 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
 
 export async function getBlogPost(slug: string): Promise<BlogPost | null> {
     try {
-        const [post] = await sql<BlogPost[]>`
+        const posts = await sql`
             SELECT 
                 id,
                 slug,
@@ -67,6 +67,7 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
             FROM blog_posts 
             WHERE slug = ${slug}
         `;
+        const post = posts[0] as BlogPost;
         return post || null;
     } catch (error) {
         console.error('Error fetching blog post:', error);
@@ -78,7 +79,7 @@ export type CreateBlogPostInput = Omit<BlogPost, 'id' | 'created_at' | 'updated_
 
 export async function createBlogPost(post: CreateBlogPostInput): Promise<BlogPost> {
     try {
-        const [newPost] = await sql<BlogPost[]>`
+        const posts = await sql`
             INSERT INTO blog_posts (
                 id,
                 slug,
@@ -117,6 +118,7 @@ export async function createBlogPost(post: CreateBlogPostInput): Promise<BlogPos
                 updated_at
         `;
 
+        const newPost = posts[0] as BlogPost;
         if (!newPost) {
             throw new Error('Failed to create blog post');
         }
