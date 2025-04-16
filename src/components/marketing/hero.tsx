@@ -1,12 +1,98 @@
+"use client";
+
 import { ArrowRightIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import Container from "../global/container";
 import Icons from "../global/icons";
 import { Button } from "../ui/button";
 import { OrbitingCircles } from "../ui/orbiting-circles";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Input } from "../ui/input";
+
+interface GoldPrice {
+    bid: number | null;
+    ask: number | null;
+    timestamp: string;
+}
+
+const goldTypes = [
+    { value: "96.5", label: "ทองคำ 96.5%" },
+    { value: "99.99", label: "ทองคำ 99.99%" }
+];
 
 const Hero = () => {
+    const [goldPrice9999, setGoldPrice9999] = useState<GoldPrice | null>(null);
+    const [goldPrice965, setGoldPrice965] = useState<GoldPrice | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Calculator state
+    const [selectedGoldType, setSelectedGoldType] = useState<string>("96.5");
+    const [goldPurity, setGoldPurity] = useState<string>("100");
+    const [goldWeight, setGoldWeight] = useState<string>("1");
+    const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null);
+
+    useEffect(() => {
+        const fetchGoldPrice = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
+                const response = await fetch("http://www.thaigold.info/RealTimeDataV2/gtdata_.txt");
+                const text = await response.text();
+                const goldDataArray = JSON.parse(text);
+
+                const gold9999 = goldDataArray.find((item: any) => item.name === "99.99%");
+                const gold965 = goldDataArray.find((item: any) => item.name === "ทองคำแท่ง 96.5%");
+
+                if (gold9999) {
+                    setGoldPrice9999({
+                        bid: gold9999.bid,
+                        ask: gold9999.ask,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                if (gold965) {
+                    setGoldPrice965({
+                        bid: gold965.bid,
+                        ask: gold965.ask,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching gold price:", error);
+                setError(error instanceof Error ? error.message : 'Failed to fetch gold price');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchGoldPrice();
+        const interval = setInterval(fetchGoldPrice, 30000); // Update every 30 seconds
+
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        const currentGoldPrice = selectedGoldType === "99.99" ? goldPrice9999 : goldPrice965;
+        
+        if (currentGoldPrice?.ask) {
+            const weight = parseFloat(goldWeight) || 0;
+            const purity = parseFloat(goldPurity) || 0;
+            const basePrice = currentGoldPrice.ask;
+            
+            const calculatedPrice = (basePrice * weight * (purity / 100));
+            setEstimatedPrice(calculatedPrice);
+        }
+    }, [goldPrice9999, goldPrice965, goldWeight, goldPurity, selectedGoldType]);
+
+    const formatPrice = (price: number | null) => {
+        if (price === null) return "ไม่พบข้อมูล";
+        return price.toLocaleString() + " บาท";
+    };
+
     return (
         <div className="relative flex flex-col items-center justify-center w-full py-20">
             <div className="absolute flex lg:hidden size-40 rounded-full bg-blue-500 blur-[10rem] top-0 left-1/2 -translate-x-1/2 -z-10"></div>
@@ -48,26 +134,102 @@ const Hero = () => {
                             <span className="backdrop absolute inset-[1px] rounded-full bg-background transition-colors duration-200 group-hover:bg-neutral-800" />
                             <span className="z-10 py-0.5 text-sm text-neutral-100 flex items-center">
                                 <span className="px-2 py-[0.5px] h-[18px] tracking-wide flex items-center justify-center rounded-full bg-gradient-to-r from-sky-400 to-blue-600 text-[9px] font-medium mr-2 text-white">
-                                    NEW
+                                    LIVE
                                 </span>
-                                ระบบออมทองออนไลน์
+                                ราคาทองวันนี้
                             </span>
                         </button>
                     </Container>
-                    <Container delay={0.15}>
-                        <h1 className="text-4xl md:text-4xl lg:text-6xl font-bold text-center !leading-tight max-w-4xl mx-auto font-prompt">
-                            ระบบออมทองออนไลน์ <br />
-                            <span className="text-blue-500">
-                                ที่ดีที่สุด
-                            </span>
-                            {" "}สำหรับร้านทอง
-                        </h1>
+
+                    {/* Gold Price Display */}
+                    <Container delay={0.1}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mt-4">
+                            <div className="p-6 rounded-xl border border-border bg-card">
+                                <h3 className="text-lg font-semibold mb-4">ทองคำ 99.99%</h3>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">ราคารับซื้อ</span>
+                                        <span className="font-medium">{isLoading ? "กำลังโหลด..." : formatPrice(goldPrice9999?.bid ?? null)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">ราคาขาย</span>
+                                        <span className="font-medium">{isLoading ? "กำลังโหลด..." : formatPrice(goldPrice9999?.ask ?? null)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-6 rounded-xl border border-border bg-card">
+                                <h3 className="text-lg font-semibold mb-4">ทองคำ 96.5%</h3>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">ราคารับซื้อ</span>
+                                        <span className="font-medium">{isLoading ? "กำลังโหลด..." : formatPrice(goldPrice965?.bid ?? null)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">ราคาขาย</span>
+                                        <span className="font-medium">{isLoading ? "กำลังโหลด..." : formatPrice(goldPrice965?.ask ?? null)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </Container>
+
+                    <Container delay={0.15}>
+                        <h1 className="text-4xl md:text-4xl lg:text-6xl font-bold text-center !leading-tight max-w-4xl mx-auto font-prompt mt-8">
+                            ประเมินราคาทองคำ
+                        </h1>
+                        <div className="mt-8 max-w-md mx-auto space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-sm text-muted-foreground">ประเภททอง</label>
+                                <Select value={selectedGoldType} onValueChange={setSelectedGoldType}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="เลือกประเภททอง" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {goldTypes.map((type) => (
+                                            <SelectItem key={type.value} value={type.value}>
+                                                {type.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm text-muted-foreground">เปอร์เซ็นต์ของทอง</label>
+                                <Input
+                                    type="number"
+                                    value={goldPurity}
+                                    onChange={(e) => setGoldPurity(e.target.value)}
+                                    min="0"
+                                    max="100"
+                                    placeholder="เปอร์เซ็นต์ของทอง"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm text-muted-foreground">น้ำหนักทอง (บาท)</label>
+                                <Input
+                                    type="number"
+                                    value={goldWeight}
+                                    onChange={(e) => setGoldWeight(e.target.value)}
+                                    min="0"
+                                    step="0.1"
+                                    placeholder="น้ำหนักทอง"
+                                />
+                            </div>
+                            <div className="pt-4 text-center">
+                                <div className="text-lg font-semibold">ราคาประเมิน</div>
+                                <div className="text-2xl text-blue-500 font-bold">
+                                    {isLoading ? "กำลังคำนวณ..." : formatPrice(estimatedPrice)}
+                                </div>
+                            </div>
+                        </div>
+                    </Container>
+
                     <Container delay={0.2}>
                         <p className="max-w-xl mx-auto mt-2 text-base lg:text-lg text-center text-muted-foreground font-thai">
-                            เปลี่ยนการซื้อขายทอง ออมทองในกระดาษให้เป็นระบบอัตโนมัติ 24 ชม. ด้วยระบบออมทองออนไลน์ที่ปลอดภัยและใช้งานง่าย
+                            ประเมินราคาทองคำแบบเรียลไทม์ด้วยระบบอัตโนมัติ อัพเดทราคาทุก 30 วินาที
                         </p>
                     </Container>
+
                     <Container delay={0.25} className="z-20">
                         <div className="flex items-center justify-center mt-6 gap-x-4">
                             <Link href="https://lin.ee/EO0xuyG" className="flex items-center gap-2 group text-black">
@@ -78,6 +240,7 @@ const Hero = () => {
                             </Link>
                         </div>
                     </Container>
+
                     <Container delay={0.3} className="relative">
                         <div className="relative rounded-xl lg:rounded-[32px] border border-border p-2 backdrop-blur-lg mt-10 max-w-6xl mx-auto">
                             <div className="absolute top-1/8 left-1/2 -z-10 bg-gradient-to-r from-sky-500 to-blue-600 w-1/2 lg:w-3/4 -translate-x-1/2 h-1/4 -translate-y-1/2 inset-0 blur-[4rem] lg:blur-[10rem] animate-image-glow"></div>
@@ -99,7 +262,7 @@ const Hero = () => {
                 </div>
             </div>
         </div>
-    )
+    );
 };
 
 export default Hero;
