@@ -17,19 +17,25 @@ export default function BlogList({ posts }: BlogListProps) {
         }
 
         try {
-            const response = await fetch(`/api/blog/delete?slug=${slug}`, {
+            const response = await fetch(`/api/blog/delete?slug=${encodeURIComponent(slug)}`, {
                 method: "DELETE",
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error("Failed to delete post");
+                throw new Error(data.error || "Failed to delete post");
             }
 
-            toast.success("Post deleted successfully");
-            // Refresh the page to update the list
-            window.location.reload();
+            toast.success(data.message || "Post deleted successfully");
+
+            // Reload the page after a short delay
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
         } catch (error) {
-            toast.error("Failed to delete post");
+            console.error("Error:", error);
+            toast.error(error instanceof Error ? error.message : "Failed to delete post");
         }
     };
 
