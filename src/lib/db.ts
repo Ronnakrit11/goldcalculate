@@ -39,7 +39,13 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
                 createdAt: 'desc'
             }
         });
-        return posts as unknown as BlogPost[];
+        
+        // Convert to the expected format
+        return posts.map(post => ({
+            ...post,
+            created_at: post.createdAt.toISOString(),
+            updated_at: post.updatedAt.toISOString()
+        })) as BlogPost[];
     } catch (error) {
         console.error('Error fetching blog posts:', error);
         return [];
@@ -53,7 +59,15 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
                 slug: slug
             }
         });
-        return post as unknown as BlogPost | null;
+
+        if (!post) return null;
+
+        // Convert to the expected format
+        return {
+            ...post,
+            created_at: post.createdAt.toISOString(),
+            updated_at: post.updatedAt.toISOString()
+        } as BlogPost;
     } catch (error) {
         console.error('Error fetching blog post:', error);
         return null;
@@ -78,7 +92,12 @@ export async function createBlogPost(post: CreateBlogPostInput): Promise<BlogPos
             }
         });
 
-        return newPost as unknown as BlogPost;
+        // Convert to the expected format
+        return {
+            ...newPost,
+            created_at: newPost.createdAt.toISOString(),
+            updated_at: newPost.updatedAt.toISOString()
+        } as BlogPost;
     } catch (error) {
         console.error('Error creating blog post:', error);
         throw error;
