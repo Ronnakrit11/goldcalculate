@@ -104,6 +104,35 @@ export async function createBlogPost(post: CreateBlogPostInput): Promise<BlogPos
     }
 }
 
+export async function updateBlogPost(slug: string, post: Partial<CreateBlogPostInput>): Promise<BlogPost> {
+    try {
+        const updatedPost = await prisma.blogPost.update({
+            where: {
+                slug: slug
+            },
+            data: {
+                title: post.title,
+                description: post.description,
+                content: post.content,
+                excerpt: post.excerpt,
+                category: post.category,
+                image: post.image,
+                keywords: post.keywords
+            }
+        });
+
+        // Convert to the expected format
+        return {
+            ...updatedPost,
+            created_at: updatedPost.createdAt.toISOString(),
+            updated_at: updatedPost.updatedAt.toISOString()
+        } as BlogPost;
+    } catch (error) {
+        console.error('Error updating blog post:', error);
+        throw error;
+    }
+}
+
 export async function deleteBlogPost(slug: string): Promise<void> {
     try {
         await prisma.blogPost.delete({

@@ -5,17 +5,23 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { BlogPost } from "@/lib/db";
 
-export default function BlogEditor() {
+interface BlogEditorProps {
+    initialData?: BlogPost;
+    onSuccess?: () => void;
+}
+
+export default function BlogEditor({ initialData, onSuccess }: BlogEditorProps) {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
-        title: "",
-        description: "",
-        content: "",
-        category: "",
-        excerpt: "",
-        keywords: "",
-        image: "/images/feature-one.svg"
+        title: initialData?.title || "",
+        description: initialData?.description || "",
+        content: initialData?.content || "",
+        category: initialData?.category || "",
+        excerpt: initialData?.excerpt || "",
+        keywords: initialData?.keywords?.join(", ") || "",
+        image: initialData?.image || "/images/feature-one.svg"
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -23,8 +29,12 @@ export default function BlogEditor() {
         setLoading(true);
 
         try {
-            const response = await fetch("/api/blog/create", {
-                method: "POST",
+            const endpoint = initialData 
+                ? `/api/blog/update?slug=${encodeURIComponent(initialData.slug)}`
+                : "/api/blog/create";
+                
+            const response = await fetch(endpoint, {
+                method: initialData ? "PUT" : "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -46,25 +56,31 @@ export default function BlogEditor() {
 
             const data = await response.json();
             
-            toast.success("Blog post created successfully!");
+            toast.success(initialData ? "Blog post updated successfully!" : "Blog post created successfully!");
             
-            // Reset form
-            setFormData({
-                title: "",
-                description: "",
-                content: "",
-                category: "",
-                excerpt: "",
-                keywords: "",
-                image: "/images/feature-one.svg"
-            });
+            if (!initialData) {
+                // Reset form for new posts
+                setFormData({
+                    title: "",
+                    description: "",
+                    content: "",
+                    category: "",
+                    excerpt: "",
+                    keywords: "",
+                    image: "/images/feature-one.svg"
+                });
+            }
 
-            // Reload the page after successful creation
+            if (onSuccess) {
+                onSuccess();
+            }
+
+            // Reload the page after successful creation/update
             window.location.reload();
 
         } catch (error) {
             console.error("Error:", error);
-            toast.error("Failed to create blog post. Please try again.");
+            toast.error(initialData ? "Failed to update blog post. Please try again." : "Failed to create blog post. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -140,7 +156,7 @@ export default function BlogEditor() {
             </div>
 
             <Button type="submit" disabled={loading} className="w-full">
-                {loading ? "Creating..." : "Create Blog Post"}
+                {loading ? (initialData ? "Updating..." : "Creating...") : (initialData ? "Update Blog Post" : "Create Blog Post")}
             </Button>
         </form>
     );
