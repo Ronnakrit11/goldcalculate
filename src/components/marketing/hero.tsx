@@ -25,7 +25,8 @@ interface GoldPrices {
 
 const goldTypes = [
     { value: "96.5", label: "ทองสมาคม" },
-    { value: "99.99", label: "ทองคำ 99.99%" }
+    { value: "99.99", label: "ทองคำ 99.99%" },
+    { value: "ornament", label: "ทองรูปพรรณ" }
 ];
 
 const Hero = () => {
@@ -64,24 +65,23 @@ const Hero = () => {
     useEffect(() => {
         if (!goldPrices) return;
 
-        const currentGoldPrice = selectedGoldType === "99.99" ? goldPrices.gold9999 : goldPrices.gold965;
-        
-        if (currentGoldPrice?.ask) {
-            const weight = parseFloat(goldWeight) || 0;
-            
-            let calculatedPrice;
-            if (selectedGoldType === "96.5" && currentGoldPrice.bid !== null) {
-                // Formula for 96.5% gold: (ราคารับซื้อ/15.2) * น้ำหนักทอง (กรัม)
-                calculatedPrice = (currentGoldPrice.bid / 15.2) * weight;
-            } else {
-                // Formula for 99.99% gold: ราคาขาย +3.5% x 0.0656 x น้ำหนักทอง
-                const sellPrice = currentGoldPrice.ask;
-                const priceWithMarkup = sellPrice * 1.035; // Add 3.5%
-                calculatedPrice = priceWithMarkup * 0.0656 * weight;
-            }
-            
-            setEstimatedPrice(calculatedPrice);
+        const weight = parseFloat(goldWeight) || 0;
+        let calculatedPrice: number | null = null;
+
+        if (selectedGoldType === "96.5" && goldPrices.gold965?.bid !== null) {
+            // Formula for 96.5% gold: (ราคารับซื้อ/15.2) * น้ำหนักทอง (กรัม)
+            calculatedPrice = (goldPrices.gold965.bid / 15.2) * weight;
+        } else if (selectedGoldType === "99.99" && goldPrices.gold9999?.ask !== null) {
+            // Formula for 99.99% gold: ราคาขาย +3.5% x 0.0656 x น้ำหนักทอง
+            const sellPrice = goldPrices.gold9999.ask;
+            const priceWithMarkup = sellPrice * 1.035;
+            calculatedPrice = priceWithMarkup * 0.0656 * weight;
+        } else if (selectedGoldType === "ornament" && goldPrices.gold965?.bid !== null) {
+            // Formula for ทองรูปพรรณ: ราคารับซื้อ x 0.0656 x 97% x น้ำหนักทอง (กรัม)
+            calculatedPrice = goldPrices.gold965.bid * 0.0656 * 0.97 * weight;
         }
+
+        setEstimatedPrice(calculatedPrice);
     }, [goldPrices, goldWeight, selectedGoldType]);
 
     const formatPrice = (price: number | null) => {
