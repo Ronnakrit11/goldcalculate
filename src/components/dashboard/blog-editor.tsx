@@ -16,6 +16,7 @@ export default function BlogEditor({ initialData, onSuccess }: BlogEditorProps) 
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         title: initialData?.title || "",
+        slug: initialData?.slug || "",
         description: initialData?.description || "",
         content: initialData?.content || "",
         category: initialData?.category || "",
@@ -23,6 +24,26 @@ export default function BlogEditor({ initialData, onSuccess }: BlogEditorProps) 
         keywords: initialData?.keywords?.join(", ") || "",
         image: initialData?.image || "/images/feature-one.svg"
     });
+
+    const generateSlug = (title: string) => {
+        return title
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+    };
+
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const title = e.target.value;
+        setFormData(prev => ({
+            ...prev,
+            title,
+            slug: generateSlug(title) // Auto-generate slug from title
+        }));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -62,6 +83,7 @@ export default function BlogEditor({ initialData, onSuccess }: BlogEditorProps) 
                 // Reset form for new posts
                 setFormData({
                     title: "",
+                    slug: "",
                     description: "",
                     content: "",
                     category: "",
@@ -93,8 +115,18 @@ export default function BlogEditor({ initialData, onSuccess }: BlogEditorProps) 
                     <label className="block text-sm font-medium mb-1">Title</label>
                     <Input
                         value={formData.title}
-                        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                        onChange={handleTitleChange}
                         required
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium mb-1">Slug</label>
+                    <Input
+                        value={formData.slug}
+                        onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                        required
+                        placeholder="your-post-url"
                     />
                 </div>
 
