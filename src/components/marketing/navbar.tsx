@@ -40,7 +40,7 @@ const Navbar = () => {
                     <div className="flex items-center gap-4">
                         <Link href="https://lin.ee/EO0xuyG" className="hidden lg:block">
                             <Button variant="blue">
-                                Get Started
+                               ติดต่อ
                             </Button>
                         </Link>
                         <MobileMenu />
