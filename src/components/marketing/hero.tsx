@@ -27,6 +27,7 @@ const goldTypes = [
     { value: "96.5", label: "ทองสมาคม" },
     { value: "99.99", label: "ทองคำ 99.99%" },
     { value: "ornament", label: "ทองรูปพรรณ" },
+    { value: "molten", label: "ทองหลอม" },
     { value: "frame-case", label: "กรอบทอง/ตลับทอง" },
     { value: "9k", label: "ทอง 9k" },
     { value: "14k", label: "ทอง 14k" },
@@ -82,6 +83,17 @@ const Hero = () => {
             calculatedPrice = priceWithMarkup * 0.0656 * weight;
         } else if (selectedGoldType === "ornament" && goldPrices.gold965?.bid !== null) {
             calculatedPrice = goldPrices.gold965.bid * 0.0656 * 0.97 * weight;
+        } else if (selectedGoldType === "molten" && goldPrices.gold965?.bid !== null) {
+            const purityPercentage = parseFloat(goldPurity) / 100;
+            const purity = parseFloat(goldPurity);
+            
+            if (purity > 71) {
+                calculatedPrice = (goldPrices.gold965.bid + 1200) * 0.0656 * purityPercentage * weight;
+            } else if (purity >= 30 && purity <= 71) {
+                calculatedPrice = (goldPrices.gold965.bid + 1100) * 0.0656 * purityPercentage * weight;
+            } else {
+                calculatedPrice = goldPrices.gold965.bid * 0.0656 * purityPercentage * weight;
+            }
         } else if ((selectedGoldType === "frame-case" || selectedGoldType === "other") && goldPrices.gold965?.bid !== null) {
             const purityPercentage = parseFloat(goldPurity) / 100;
             calculatedPrice = goldPrices.gold965.bid * 0.0656 * purityPercentage * weight;
@@ -209,7 +221,7 @@ const Hero = () => {
                                     </SelectContent>
                                 </Select>
                             </div>
-                            {(selectedGoldType === "frame-case" || selectedGoldType === "other") && (
+                            {(selectedGoldType === "frame-case" || selectedGoldType === "other" || selectedGoldType === "molten") && (
                                 <div className="space-y-2">
                                     <label className="text-sm text-muted-foreground">เปอร์เซ็นต์ทอง (%)</label>
                                     <Input
