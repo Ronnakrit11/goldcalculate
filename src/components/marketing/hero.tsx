@@ -26,7 +26,8 @@ interface GoldPrices {
 const goldTypes = [
     { value: "96.5", label: "ทองสมาคม" },
     { value: "99.99", label: "ทองคำ 99.99%" },
-    { value: "ornament", label: "ทองรูปพรรณ" }
+    { value: "ornament", label: "ทองรูปพรรณ" },
+    { value: "frame-case", label: "กรอบทอง/ตลับทอง" }
 ];
 
 const Hero = () => {
@@ -37,6 +38,7 @@ const Hero = () => {
     // Calculator state
     const [selectedGoldType, setSelectedGoldType] = useState<string>("96.5");
     const [goldWeight, setGoldWeight] = useState<string>("1");
+    const [goldPurity, setGoldPurity] = useState<string>("90");
     const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null);
 
     useEffect(() => {
@@ -69,20 +71,20 @@ const Hero = () => {
         let calculatedPrice: number | null = null;
 
         if (selectedGoldType === "96.5" && goldPrices.gold965?.bid !== null) {
-            // Formula for 96.5% gold: (ราคารับซื้อ/15.2) * น้ำหนักทอง (กรัม)
             calculatedPrice = (goldPrices.gold965.bid / 15.2) * weight;
         } else if (selectedGoldType === "99.99" && goldPrices.gold9999?.ask !== null) {
-            // Formula for 99.99% gold: ราคาขาย +3.5% x 0.0656 x น้ำหนักทอง
             const sellPrice = goldPrices.gold9999.ask;
             const priceWithMarkup = sellPrice * 1.035;
             calculatedPrice = priceWithMarkup * 0.0656 * weight;
         } else if (selectedGoldType === "ornament" && goldPrices.gold965?.bid !== null) {
-            // Formula for ทองรูปพรรณ: ราคารับซื้อ x 0.0656 x 97% x น้ำหนักทอง (กรัม)
             calculatedPrice = goldPrices.gold965.bid * 0.0656 * 0.97 * weight;
+        } else if (selectedGoldType === "frame-case" && goldPrices.gold965?.bid !== null) {
+            const purityPercentage = parseFloat(goldPurity) / 100;
+            calculatedPrice = goldPrices.gold965.bid * 0.0656 * purityPercentage * weight;
         }
 
         setEstimatedPrice(calculatedPrice);
-    }, [goldPrices, goldWeight, selectedGoldType]);
+    }, [goldPrices, goldWeight, selectedGoldType, goldPurity]);
 
     const formatPrice = (price: number | null) => {
         if (price === null) return "ไม่พบข้อมูล";
@@ -197,6 +199,19 @@ const Hero = () => {
                                     </SelectContent>
                                 </Select>
                             </div>
+                            {selectedGoldType === "frame-case" && (
+                                <div className="space-y-2">
+                                    <label className="text-sm text-muted-foreground">เปอร์เซ็นต์ทอง (%)</label>
+                                    <Input
+                                        type="number"
+                                        value={goldPurity}
+                                        onChange={(e) => setGoldPurity(e.target.value)}
+                                        min="1"
+                                        max="100"
+                                        placeholder="เปอร์เซ็นต์ทอง"
+                                    />
+                                </div>
+                            )}
                             <div className="space-y-2">
                                 <label className="text-sm text-muted-foreground">น้ำหนักทอง (กรัม)</label>
                                 <Input
