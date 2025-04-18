@@ -38,7 +38,7 @@ const Navbar = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <Link href="https://lin.ee/EO0xuyG" className="hidden lg:block">
+                        <Link href="https://web.facebook.com/profile.php?id=61570053279894" className="hidden lg:block">
                             <Button variant="blue">
                                ติดต่อ
                             </Button>
