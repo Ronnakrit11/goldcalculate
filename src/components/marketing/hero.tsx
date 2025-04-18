@@ -27,7 +27,8 @@ const goldTypes = [
     { value: "96.5", label: "ทองสมาคม" },
     { value: "99.99", label: "ทองคำ 99.99%" },
     { value: "ornament", label: "ทองรูปพรรณ" },
-    { value: "frame-case", label: "กรอบทอง/ตลับทอง" }
+    { value: "frame-case", label: "กรอบทอง/ตลับทอง" },
+    { value: "9k", label: "ทอง 9k" }
 ];
 
 const Hero = () => {
@@ -81,6 +82,8 @@ const Hero = () => {
         } else if (selectedGoldType === "frame-case" && goldPrices.gold965?.bid !== null) {
             const purityPercentage = parseFloat(goldPurity) / 100;
             calculatedPrice = goldPrices.gold965.bid * 0.0656 * purityPercentage * weight;
+        } else if (selectedGoldType === "9k" && goldPrices.gold965?.bid !== null) {
+            calculatedPrice = (goldPrices.gold965.bid + 800) * 0.0656 * 0.375 * weight;
         }
 
         setEstimatedPrice(calculatedPrice);
