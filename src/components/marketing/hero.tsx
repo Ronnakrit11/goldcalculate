@@ -24,7 +24,7 @@ interface GoldPrices {
 }
 
 const goldTypes = [
-    { value: "96.5", label: "ทอทองคำแท่ง 96.5%" },
+    { value: "96.5", label: "ทองคำแท่ง 96.5%" },
     { value: "ornament", label: "ทองรูปพรรณ" },
     { value: "molten", label: "ทองหลอม" },
     { value: "frame-case", label: "กรอบทอง/ตลับทอง" },
