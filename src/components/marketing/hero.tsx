@@ -163,26 +163,10 @@ const Hero = () => {
 
                     {/* Gold Price Display */}
                     <Container delay={0.1}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mt-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mt-4 ">
+                       
                             <div className="p-6 rounded-xl border border-border bg-card">
-                                <h3 className="text-lg font-semibold mb-4">ทองคำ 99.99%</h3>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">ราคารับซื้อ</span>
-                                        <span className="font-medium">
-                                            {isLoading ? "กำลังโหลด..." : formatPrice(goldPrices?.gold9999?.bid ?? null)}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">ราคาขาย</span>
-                                        <span className="font-medium">
-                                            {isLoading ? "กำลังโหลด..." : formatPrice(goldPrices?.gold9999?.ask ?? null)}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="p-6 rounded-xl border border-border bg-card">
-                                <h3 className="text-lg font-semibold mb-4">ทองสมาคม</h3>
+                                <h3 className="text-lg font-semibold mb-4">ทองคำเเท่ง 96.5%</h3>
                                 <div className="space-y-4">
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">ราคารับซื้อ</span>
