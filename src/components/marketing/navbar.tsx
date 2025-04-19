@@ -1,5 +1,4 @@
 import { NAV_LINKS } from "@/constants";
-import Image from "next/image";
 import Link from "next/link";
 import Wrapper from "../global/wrapper";
 import { Button } from "../ui/button";
@@ -12,13 +11,6 @@ const Navbar = () => {
                 <div className="flex items-center justify-between h-full">
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center gap-2">
-                            <Image 
-                                src="/icons/au.png" 
-                                alt="Logo" 
-                                width={43} 
-                                height={43}
-                                className="w-[43px] h-[43px]"
-                            />
                             <span className="text-l font-semibold hidden lg:block">
                                 จ่าคิง ปากพนัง
                             </span>

@@ -25,7 +25,6 @@ interface GoldPrices {
 
 const goldTypes = [
     { value: "96.5", label: "ทองสมาคม" },
-    
     { value: "ornament", label: "ทองรูปพรรณ" },
     { value: "molten", label: "ทองหลอม" },
     { value: "frame-case", label: "กรอบทอง/ตลับทอง" },
@@ -39,8 +38,6 @@ const Hero = () => {
     const [goldPrices, setGoldPrices] = useState<GoldPrices | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
-    // Calculator state
     const [selectedGoldType, setSelectedGoldType] = useState<string>("96.5");
     const [goldWeight, setGoldWeight] = useState<string>("1");
     const [goldPurity, setGoldPurity] = useState<string>("90");
@@ -64,7 +61,7 @@ const Hero = () => {
         };
 
         fetchGoldPrice();
-        const interval = setInterval(fetchGoldPrice, 30000); // Update every 30 seconds
+        const interval = setInterval(fetchGoldPrice, 30000);
 
         return () => clearInterval(interval);
     }, []);
@@ -161,10 +158,20 @@ const Hero = () => {
                         </button>
                     </Container>
 
-                    {/* Gold Price Display */}
                     <Container delay={0.1}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mt-4 ">
-                       
+                        <div className="flex items-center justify-center mb-4">
+                            <Image 
+                                src="/icons/au.png" 
+                                alt="Logo" 
+                                width={70} 
+                                height={70}
+                                className="w-[80px] h-[80px]"
+                            />
+                        </div>
+                    </Container>
+
+                    <Container delay={0.1}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mt-4">
                             <div className="p-6 rounded-xl border border-border bg-card">
                                 <h3 className="text-lg font-semibold mb-4">ทองคำเเท่ง 96.5%</h3>
                                 <div className="space-y-4">
