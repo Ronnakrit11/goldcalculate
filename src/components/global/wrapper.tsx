@@ -10,7 +10,7 @@ const Wrapper = ({ children, className }: Props) => {
     return (
         <div
             className={cn(
-                "w-full mx-auto lg:max-w-screen-xl lg:mx-auto px-4 md:px-12",
+                "w-full mx-auto lg:max-w-screen-xl lg:mx-auto px-4 md:px-12 ",
                 className
             )}
         >
