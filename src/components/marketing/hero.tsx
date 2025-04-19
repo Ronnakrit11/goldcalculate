@@ -159,13 +159,13 @@ const Hero = () => {
                     </Container>
 
                     <Container delay={0.1}>
-                        <div className="flex items-center justify-center mb-4">
+                        <div className="flex items-center justify-center mb-0">
                             <Image 
                                 src="/icons/au.png" 
                                 alt="Logo" 
-                                width={70} 
-                                height={70}
-                                className="w-[105px] h-[105px]"
+                                width={90} 
+                                height={90}
+                                className="w-[125px] h-[125px]"
                             />
                         </div>
                     </Container>
