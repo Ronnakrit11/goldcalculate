@@ -25,7 +25,7 @@ interface GoldPrices {
 
 const goldTypes = [
     { value: "96.5", label: "ทองสมาคม" },
-    { value: "99.99", label: "ทองคำ 99.99%" },
+    
     { value: "ornament", label: "ทองรูปพรรณ" },
     { value: "molten", label: "ทองหลอม" },
     { value: "frame-case", label: "กรอบทอง/ตลับทอง" },
