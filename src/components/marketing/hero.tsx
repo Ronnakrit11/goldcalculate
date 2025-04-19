@@ -165,7 +165,7 @@ const Hero = () => {
                                 alt="Logo" 
                                 width={70} 
                                 height={70}
-                                className="w-[80px] h-[80px]"
+                                className="w-[105px] h-[105px]"
                             />
                         </div>
                     </Container>
